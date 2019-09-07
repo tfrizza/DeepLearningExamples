@@ -194,6 +194,7 @@ def save_checkpoint(model, epoch, config, filepath):
 def save_sample(model_name, model, waveglow_path, tacotron2_path, phrase_path, filepath, sampling_rate):
     if phrase_path is None:
         return
+    print()
     phrase = torch.load(phrase_path, map_location='cpu')
     if model_name == 'Tacotron2':
         if waveglow_path is None:
@@ -208,8 +209,8 @@ def save_sample(model_name, model, waveglow_path, tacotron2_path, phrase_path, f
                     'WaveGlow', checkpoint['config'], to_cuda=False)
             waveglow.eval()
             model.eval()
-            phrase_len = torch.LongTensor([len(p) for p in phrase])
-            mel = model.infer(phrase.cuda(), phrase_len)[1].cpu()
+            # phrase_len = torch.LongTensor([len(p) for p in phrase])
+            mel = model.infer(phrase.cuda())[1].cpu()
             model.train()
             audio = waveglow.infer(mel, sigma=0.6)
     elif model_name == 'WaveGlow':

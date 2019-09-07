@@ -364,10 +364,10 @@ class Decoder(nn.Module):
         # (T_out, B) -> (B, T_out)
         alignments = torch.stack(alignments).transpose(0, 1)
         # (T_out, B) -> (B, T_out)\
-        gate_outputs = torch.stack(gate_outputs).transpose(0, -1)
+        gate_outputs = torch.stack(gate_outputs).transpose(0, -1) # used to be 1
         gate_outputs = gate_outputs.contiguous()
         # (T_out, B, n_mel_channels) -> (B, T_out, n_mel_channels)
-        mel_outputs = torch.stack(mel_outputs).transpose(0, 1).contiguous()
+        mel_outputs = torch.stack(mel_outputs).transpose(0, -1).contiguous() # used to be 1
         # decouple frames per step
         mel_outputs = mel_outputs.view(
             mel_outputs.size(0), -1, self.n_mel_channels)

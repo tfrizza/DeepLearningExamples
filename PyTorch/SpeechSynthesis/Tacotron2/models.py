@@ -67,9 +67,14 @@ def get_model(model_name, model_config, to_cuda,
     """ Code chooses a model based on name"""
     model = None
     if model_name == 'Tacotron2':
-        model = Tacotron2(**model_config)
+        model = torch.hub.load('nvidia/DeepLearningExamples:torchhub', 'nvidia_'+model_name.lower())
+        model = model.to('cuda')
+        # model = Tacotron2(**model_config)
     elif model_name == 'WaveGlow':
-        model = WaveGlow(**model_config)
+        # model = WaveGlow(**model_config)
+        model = torch.hub.load('nvidia/DeepLearningExamples:torchhub', 'nvidia_'+model_name.lower())
+        model = model.remove_weightnorm(waveglow)
+        model = model.to('cuda')
     else:
         raise NotImplementedError(model_name)
 

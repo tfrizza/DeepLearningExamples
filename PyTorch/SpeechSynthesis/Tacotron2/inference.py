@@ -116,11 +116,19 @@ def load_and_setup_model(model_name, parser, checkpoint, amp_run):
     model = models.get_model(model_name, model_config, to_cuda=True)
 
     if checkpoint is not None:
-        state_dict = torch.load(checkpoint)['state_dict']
-        if checkpoint_from_distributed(state_dict):
-            state_dict = unwrap_distributed(state_dict)
+        # Grab corresponding model from torchhub
+        # Adding this because having issue loading in waveglow checkpoint from their repo
+        if checkpoint == 'HUB':
+            model = torch.hub.load('nvidia/DeepLearningExamples:torchhub', 'nvidia_'+model_name.lower())
+            model.to('cuda') # of model.cuda()
+        else:
+            import os
+            assert os.path.exists(checkpoint), "Checkpoint not found. Aborting."
+            state_dict = torch.load(checkpoint)['state_dict']
+            if checkpoint_from_distributed(state_dict):
+                state_dict = unwrap_distributed(state_dict)
 
-        model.load_state_dict(state_dict)
+            model.load_state_dict(state_dict)
 
     if model_name == "WaveGlow":
         model = model.remove_weightnorm(model)

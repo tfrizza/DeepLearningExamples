@@ -299,7 +299,7 @@ def main():
 
     LOGGER.set_model_name("Tacotron2_PyT")
     LOGGER.set_backends([
-        dllg.StdOutBackend(log_file=None,
+        dllg.StdOutBackend(log_file='stdoutlogs.txt',
                            logging_scope=dllg.TRAIN_ITER_SCOPE, iteration_interval=1),
         dllg.JsonBackend(log_file=args.log_file if args.rank == 0 else None,
                          logging_scope=dllg.TRAIN_ITER_SCOPE, iteration_interval=1)
@@ -485,7 +485,7 @@ def main():
                  distributed_run, args.rank, batch_to_gpu)
 
         LOGGER.log(key=tags.EVAL_STOP, value=epoch)
-
+        
         if (epoch % args.epochs_per_checkpoint == 0) and args.rank == 0:
             checkpoint_path = os.path.join(
                 args.output_directory, "checkpoint_{}_{}".format(model_name, epoch))

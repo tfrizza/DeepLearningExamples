@@ -200,12 +200,16 @@ def save_sample(model_name, model, waveglow_path, tacotron2_path, phrase_path, f
             raise Exception(
                 "WaveGlow checkpoint path is missing, could not generate sample")
         with torch.no_grad():
-            checkpoint = torch.load(waveglow_path, map_location='cpu')
-            waveglow = models.get_model(
-                'WaveGlow', checkpoint['config'], to_cuda=False)
+            if waveglow_path == 'HUB':
+                waveglow = torch.hub.load('nvidia/DeepLearningExamples:torchhub', 'nvidia_waveglow')
+            else:
+                checkpoint = torch.load(waveglow_path, map_location='cpu')
+                waveglow = models.get_model(
+                    'WaveGlow', checkpoint['config'], to_cuda=False)
             waveglow.eval()
             model.eval()
-            mel = model.infer(phrase.cuda())[0].cpu()
+            phrase_len = torch.LongTensor([len(p) for p in phrase])
+            mel = model.infer(phrase.cuda(), phrase_len)[1].cpu()
             model.train()
             audio = waveglow.infer(mel, sigma=0.6)
     elif model_name == 'WaveGlow':
@@ -213,9 +217,12 @@ def save_sample(model_name, model, waveglow_path, tacotron2_path, phrase_path, f
             raise Exception(
                 "Tacotron2 checkpoint path is missing, could not generate sample")
         with torch.no_grad():
-            checkpoint = torch.load(tacotron2_path, map_location='cpu')
-            tacotron2 = models.get_model(
-                'Tacotron2', checkpoint['config'], to_cuda=False)
+            if tacotron2_path == 'HUB':
+                tacotron2 = torch.hub.load('nvidia/DeepLearningExamples:torchhub', 'nvidia_tacotron2')
+            else:
+                checkpoint = torch.load(tacotron2_path, map_location='cpu')
+                tacotron2 = models.get_model(
+                    'Tacotron2', checkpoint['config'], to_cuda=False)
             tacotron2.eval()
             mel = tacotron2.infer(phrase)[0].cuda()
             model.eval()
